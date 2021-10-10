@@ -17,3 +17,5 @@ class Minimax:
         best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE])) #minimax algorithm
 
         return best_movement
+
+    # find(self.state, player_turn, self.config.thinking_time)

@@ -15,5 +15,5 @@ class Minimax:
         self.thinking_time = time() + thinking_time
 
         best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE])) #minimax algorithm
-
+        #best_movement = (2,ShapeConstant.CIRCLE)
         return best_movement

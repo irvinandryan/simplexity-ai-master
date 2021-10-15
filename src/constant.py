@@ -20,6 +20,8 @@ class GameConstant:
     PLAYER_COLOR = [ColorConstant.RED, ColorConstant.BLUE]
     N_COMPONENT_STREAK = 4
 
+    PLAYER1 = "P1"
+    PLAYER2 = "P2"
     PLAYER1_COLOR = ColorConstant.RED
     PLAYER1_SHAPE = ShapeConstant.CIRCLE
     PLAYER2_COLOR = ColorConstant.BLUE

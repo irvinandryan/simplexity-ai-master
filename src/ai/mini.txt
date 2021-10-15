@@ -1,0 +1,63 @@
+
+function minimax(State: state, Integer: depth, Integer: alpha, Integer: beta)
+KAMUS DATA
+maxEval, eval, alpha, beta : Integer
+possibleMoves : array of array of integer {(a,b),(c,d),(e,f)}
+
+ALGORITMA
+{basis}
+if (depth == 0 or is_win(state.board))
+    return value      # heuristic value of position
+
+possibleMoves = inputPossibleMoves(state) 
+
+{rekursif}
+{player 1 (RED O)}
+if (state.round % 2 == 0)) {
+    maxEval = -infinity
+    for each possibleMoves{
+        eval = minimax(state, depth - 1, alpha, beta)
+        maxEval = max(maxEval, eval)
+        alpha = max(alpha, eval)
+        if beta <= alpha{
+            break
+        }
+    }
+    return maxEval
+}
+
+{player 2 (BLUE X)}
+else{
+    minEval = +infinity
+    for each possibleMoves{
+        eval = minimax(state, depth - 1, alpha, beta)
+        minEval = min(minEval, eval)
+        beta = min(beta, eval)
+        if beta <= alpha{
+            break
+        }
+    }
+    return minEval
+}
+
+
+
+Ketika function minimax dipanggil, akan dicek apakah parameter depth sudah mencapai 0 (nol) atau apakah kondisi menang sudah tercapai, kedua pengecekkan ini bertindak sebagai basis dari fungsi minimax. Jika kondisi basis terpenuhi, maka function akan me-return nilai heuristic berdasarkan posisi sekarang. Lalu kode akan mencatat kemungkinan langkah yang dapat dilakukan pada possibleMoves. 
+
+Setelah itu masuk ke tahap rekursif yang dibagi menjadi dua bagian yaitu  bagian jika round genap atau ganjil untuk menentukan sekarang giliran player RED atau BLUE. Round genap berarti giliran player RED, sedangkan round ganjil giliran player BLUE.
+
+Jika round genap, pertama-tama kode akan meng-assign variable maxEval dengan -infinity. Lalu melakukan forEach loop pada possibleMoves. Pada pengulangan ini, dilakukan rekursif dengan parameter (depth-1) dan nilai yang dihasilkan disimpan pada variable eval. Setelah itu meng-assign nilai eval ke maxEval dan alpha (jika eval lebih besar dari maxEval atau alpha), kemudian membandingkan nilai alpha dan beta. Jika beta lebih kecil sama dengan alpha, maka lakukan break. Tetapi jika sebaliknya, return maxEval. Round ganjil mirip dengan round genap, hanya saja jika round genap mencari maxEval yang terbesar, round ganjil mencari minEval yang terkecil.
+
+
+Function value(Tuple: position) {contoh bentuk position: (x,y) atau (2,3)} 
+    { jika disekeliling suatu piece (dalam satu garis horizontal, vertikal, dan diagonal) terdapat piece lain dengan color atau shape yang sesuai dengan player maka value akan bertambah
+    untuk setiap color sama, value bertambah 1
+    untuk setiap shape sama, value bertambah 1
+    . -=- . -=- . -=- . -=- . -=- . -=- . -=- .
+    |  -  |  -  |  2  |  -  |  2  |  -  |  -  |
+    . -=- . -=- . -=- . -=- . -=- . -=- . -=- .
+    |  4  |  4  |  X  |  4  |  X  |  4  |  4  |
+    misal contoh di atas berwarna merah semua dengan bentuk X, dan piece yang akan ditaruh berwarna merah dan bentuk X
+    }
+    
+    if (anySurroundingPoint)

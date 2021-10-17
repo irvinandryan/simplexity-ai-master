@@ -29,7 +29,21 @@ class GameConstant:
 
     BVB = 0  # Bot vs Bot
     PVB = 1  # Player vs Bot
-    PVP = 2  # Player vs Player
+    PVP = 2  # Player vs 
+    
+
+class Direction:
+    N = (0,1)
+    S = (0,-1)
+    E = (1,0)
+    W = (-1,0)
+
+    NE = (1,1)
+    NW = (-1,1)
+    SE = (1,-1)
+    SW = (-1,-1)
+
+    O = (0,0)
 
 
 class Path:

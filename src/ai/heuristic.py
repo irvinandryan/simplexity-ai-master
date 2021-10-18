@@ -18,38 +18,9 @@ def heuristicValue(state: State, position: Tuple[int, int], shape: ShapeConstant
     
     # total value
     totalValue = 0
-    totalValueAdded = 0 # jika sampai 4 iterative berhenti
-
-    # whose turn
-    playing = whoseTurn(state)
-
-    # list posisi yang dapat menguntungkan player
-    nearbyGoodSpace = listNearbyGoodSpace(state, position, playing)
-    
-    # ALGORITMA
-    # posisi sekarang
-    xposition = position[0] 
-    yposition = position[1]
-
-    
-    # posisi yang akan di cek
-    xcheck = position[0]
-    ycheck = position[1]
-
-    # heuristicnya
-    
-
+    totalValue = shapeEvaluate(state, position, shape) + colorEvaluate(state, position, color)
 
     return totalValue
-
-def findBlankRow(state: State, column: int) -> int:
-#mencari baris ke berapa yang kosong pada suatu column
-    for baris in (state.board.row):
-        checkPosition = state.board[baris][column]
-        if(isBlank(state, checkPosition)):
-            break
-    return baris
-
 
 def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant) -> int:
     playing = whoseTurn(state)
@@ -71,7 +42,7 @@ def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant)
     #cek streak untuk playing
     for playingCheck in nearbyPlayingShape:
         arah = direction(position, playingCheck)
-        while(isPiecePlayingShape(state, playingCheck)):
+        while(isPiecePlayingShape(state, playingCheck) and shape == state.board.__getitem__([playingCheck[0], playingCheck[1]]).shape):
             playingShapeStreak += 1
             playingCheck[0] += arah[0]
             playingCheck[1] += arah[1]
@@ -79,12 +50,21 @@ def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant)
     #cek streak untuk enemy
     for enemyCheck in nearbyEnemyShape:
         arah = direction(position, enemyCheck)
-        while(not(isPiecePlayingShape(state, enemyCheck))):
+        while(not(isPiecePlayingShape(state, enemyCheck) and shape == state.board.__getitem__([playingCheck[0], playingCheck[1]])).shape):
             enemyShapeStreak += 1
             enemyCheck[0] += arah[0]
             enemyCheck[1] += arah[1]
     
-    shapeStreak = playingShapeStreak - enemyShapeStreak
+    if playingShapeStreak == 3:
+        playingShapeStreak *= 200
+    else:
+        playingShapeStreak *= 20
+    if enemyShapeStreak == 3:
+        enemyShapeStreak *= 150
+    else:
+        enemyShapeStreak *= 20
+    
+    shapeStreak = playingShapeStreak + enemyShapeStreak
     return shapeStreak
 
 def colorEvaluate(state: State, position: Tuple[int, int], color: ColorConstant) -> int:
@@ -107,7 +87,7 @@ def colorEvaluate(state: State, position: Tuple[int, int], color: ColorConstant)
     #cek streak untuk playing jika dipilih position sebagai next step
     for playingCheck in nearbyPlayingColor:
         arah = direction(position, playingCheck)
-        while(isPiecePlayingColor(state, playingCheck)):
+        while(isPiecePlayingColor(state, playingCheck) and color == state.board.__getitem__([playingCheck[0], playingCheck[1]]).color):
             playingColorStreak += 1
             playingCheck[0] += arah[0]
             playingCheck[1] += arah[1]
@@ -115,12 +95,21 @@ def colorEvaluate(state: State, position: Tuple[int, int], color: ColorConstant)
     #cek streak untuk enemy jika enemy memilih position sebagai next step
     for enemyCheck in nearbyEnemyColor:
         arah = direction(position, enemyCheck)
-        while(not(isPiecePlayingColor(state, enemyCheck))):
+        while(not(isPiecePlayingColor(state, enemyCheck)) and color == state.board.__getitem__([playingCheck[0], playingCheck[1]]).color):
             enemyColorStreak += 1
             enemyCheck[0] += arah[0]
             enemyCheck[1] += arah[1]
+
+    if playingColorStreak == 3:
+        playingColorStreak *= 100
+    else:
+        playingColorStreak *= 10
+    if enemyColorStreak == 3:
+        enemyColorStreak *= 50
+    else:
+        enemyColorStreak *= 10
     
-    colorStreak = playingColorStreak - enemyColorStreak
+    colorStreak = playingColorStreak + enemyColorStreak
     return colorStreak
 
 def isPiecePlayingColor(state: State, position: Tuple[int, int]) -> bool:

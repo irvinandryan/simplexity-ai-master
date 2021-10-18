@@ -1,5 +1,6 @@
 import random
 from time import time
+from model import piece
 
 from src.constant import GameConstant, ShapeConstant, ColorConstant, Direction
 from src.model import State
@@ -42,48 +43,105 @@ def heuristicValue(state: State, position: Tuple[int, int], shape: ShapeConstant
     return totalValue
 
 def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant) -> int:
-    # whose turn
     playing = whoseTurn(state)
+    if playing == GameConstant.PLAYER1:
+        enemy = GameConstant.PLAYER2
+    else:
+        enemy = GameConstant.PLAYER1
 
-    # list posisi yang dapat menguntungkan player
-    nearbySameShape = listNearbyShape(state, position, playing)
+    #playing adalah pemain yang sedang turn-nya
 
-    '''
-    # posisi sekarang
-    xposition = position[0] 
-    yposition = position[1]
+    #mendata posisi mana saja yang bentuknya sama dengan playing
+    nearbyPlayingShape = listNearbyShape(state, position, playing)
+    #mendata posisi mana saja yang warnanya sama dengan musuh
+    nearbyEnemyShape = listNearbyShape(state, position, enemy)
+
+    playingShapeStreak = 0
+    enemyShapeStreak = 0
+
+    #cek streak untuk playing
+    for playingCheck in nearbyPlayingShape:
+        arah = direction(position, playingCheck)
+        while(isPiecePlayingShape(state, playingCheck)):
+            playingShapeStreak += 1
+            playingCheck[0] += arah[0]
+            playingCheck[1] += arah[1]
+
+    #cek streak untuk enemy
+    for enemyCheck in nearbyEnemyShape:
+        arah = direction(position, enemyCheck)
+        while(not(isPiecePlayingShape(state, enemyCheck))):
+            enemyShapeStreak += 1
+            enemyCheck[0] += arah[0]
+            enemyCheck[1] += arah[1]
     
-    # posisi yang akan di cek
-    xcheck = position[0]
-    ycheck = position[1]
-    '''
-
-    shapeStreak = 0
-    for positionCheck in nearbySameShape:
-        arah = direction(position, positionCheck)
-        while(isPieceP1Shape(state, positionCheck)):
-            shapeStreak += 1
-            positionCheck[0] += arah[0]
-            positionCheck[1] += arah[1]
-
+    shapeStreak = playingShapeStreak - enemyShapeStreak
     return shapeStreak
 
 def colorEvaluate(state: State, position: Tuple[int, int], color: ColorConstant) -> int:
-    
     playing = whoseTurn(state)
+    if playing == GameConstant.PLAYER1:
+        enemy = GameConstant.PLAYER2
+    else:
+        enemy = GameConstant.PLAYER1
 
-    nearbySameColor = listNearbyColor(state, position, playing)
+    #playing adalah pemain yang sedang turn-nya
 
-    colorStreak = 0
-    for positionCheck in nearbySameColor:
-        arah = direction(position, positionCheck)
-        while(isPieceP1Color(state, positionCheck)):
-            colorStreak += 1
-            positionCheck[0] += arah[0]
-            positionCheck[1] += arah[1]
+    #mendata posisi mana saja yang warnanya sama dengan playing
+    nearbyPlayingColor = listNearbyColor(state, position, playing)
+    #mendata posisi mana saja yang warnanya sama dengan musuh
+    nearbyEnemyColor = listNearbyColor(state, position, enemy)
+
+    playingColorStreak = 0
+    enemyColorStreak = 0
+
+    #cek streak untuk playing jika dipilih position sebagai next step
+    for playingCheck in nearbyPlayingColor:
+        arah = direction(position, playingCheck)
+        while(isPiecePlayingColor(state, playingCheck)):
+            playingColorStreak += 1
+            playingCheck[0] += arah[0]
+            playingCheck[1] += arah[1]
+
+    #cek streak untuk enemy jika enemy memilih position sebagai next step
+    for enemyCheck in nearbyEnemyColor:
+        arah = direction(position, enemyCheck)
+        while(not(isPiecePlayingColor(state, enemyCheck))):
+            enemyColorStreak += 1
+            enemyCheck[0] += arah[0]
+            enemyCheck[1] += arah[1]
     
+    colorStreak = playingColorStreak - enemyColorStreak
     return colorStreak
-            
+
+def isPiecePlayingColor(state: State, position: Tuple[int, int]) -> bool:
+    playing = whoseTurn(state)
+    piece = state.board.__getitem__([position[0], position[1]])
+    if playing == GameConstant.PLAYER1:
+        if piece.color == GameConstant.PLAYER1_COLOR:
+            return True
+        else:
+            return False
+    else: #playing giliran player 2
+        if piece.color == GameConstant.PLAYER2_COLOR:
+            return True
+        else:
+            return False
+
+def isPiecePlayingShape(state: State, position: Tuple[int, int]) -> bool:
+    playing = whoseTurn(state)
+    piece = state.board.__getitem__([position[0], position[1]])
+    if playing == GameConstant.PLAYER1:
+        if piece.shape == GameConstant.PLAYER1_SHAPE:
+            return True
+        else:
+            return False
+    else: #playing giliran player 2
+        if piece.shape == GameConstant.PLAYER2_SHAPE:
+            return True
+        else:
+            return False
+
 def isPieceP1Shape(state: State, position: Tuple[int, int]) -> bool:
     # Cek apakah shape milik player 1
 

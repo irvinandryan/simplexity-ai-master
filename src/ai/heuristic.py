@@ -59,34 +59,24 @@ def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant)
     xcheck = position[0]
     ycheck = position[1]
 
-    
-    
-
-
     return shapeValue
 
 def colorEvaluate(state: State, position: Tuple[int, int], color: ColorConstant) -> int:
     
-    colorValue = 0
-
     playing = whoseTurn(state)
 
     nearbySameColor = listNearbyColor(state, position, playing)
 
-    #for pos in nearbySameColor:
-
-
-    xposition = position[0]
-    yposition = position[1]
-
-    xcheck = position[0]
-    ycheck = position[1]
-
+    colorStreak = 0
+    for positionCheck in nearbySameColor:
+        arah = direction(position, positionCheck)
+        while(isPieceP1Color(state, positionCheck)):
+            colorStreak += 1
+            positionCheck[0] += arah[0]
+            positionCheck[1] += arah[1]
     
-    
-
-    return colorValue
-
+    return colorStreak
+            
 def isPieceP1Shape(state: State, position: Tuple[int, int]) -> bool:
     # Cek apakah shape milik player 1
 
@@ -248,5 +238,4 @@ def direction(position1: Tuple[int,int], position2: Tuple[int,int]) -> Direction
         elif position2[1] - position1[1] == -1:
             return Direction.S
         
-
 

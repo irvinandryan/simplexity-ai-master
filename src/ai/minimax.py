@@ -1,8 +1,8 @@
 import random
 from time import time
-from ai.heuristic import getPossibleMoves, heuristicValue, whoseTurn
-from model import board
-from model.piece import Piece
+from src.ai.heuristic import *
+from src.model import board
+from src.model.piece import Piece
 
 from src.constant import GameConstant, ShapeConstant
 from src.model import State
@@ -19,8 +19,10 @@ class Minimax:
 
         playing = whoseTurn(state)
 
+        #minimax algorithm
         best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
-        # Minimax(state, 3, playing) #minimax algorithm
+        
+        # best_movement = self.minimax(state, 3, playing) 
 
         return best_movement
 
@@ -114,9 +116,6 @@ class Minimax:
             if (posScore > a):
                 a = posScore
         return a
-
-
-    
 
     def tempMove(self, state: State, position: Tuple[int,int], playing: GameConstant) -> State:
         if (playing == GameConstant.PLAYER1):

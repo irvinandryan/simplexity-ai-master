@@ -1,9 +1,8 @@
 import random
 from time import time
-from model import config, piece
 
 from src.constant import GameConstant, ShapeConstant, ColorConstant, Direction
-from src.model import State, Config
+from src.model import State, piece
 # import src.ai.objective
 
 from typing import Tuple, List
@@ -160,13 +159,13 @@ def isPieceP1Color(state: State, position: Tuple[int, int]) -> bool:
 
 def isBlank(state: State, position: Tuple[int, int]) -> bool:
     # cek apakah cell kosong
-    piece = state.board[position[0], position[1]]
+    piece = state.board.__getitem__([position[0], position[1]])
 
-    # true jika SELAIN ada isinya. Selain BLANK juga true
-    if piece.shape == ShapeConstant.CIRCLE or piece.shape == ShapeConstant.CROSS:
-        return False
-    else:
+    # true jika BLANK
+    if piece.shape == ShapeConstant.BLANK:
         return True
+    else:
+        return False
 
 def whoseTurn(state: State) -> GameConstant:
     # round genap -> P1

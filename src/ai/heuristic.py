@@ -301,4 +301,17 @@ def direction(position1: Tuple[int,int], position2: Tuple[int,int]) -> Direction
         elif position2[1] - position1[1] == -1:
             return Direction.S
         
+def getPossibleMoves(state: State) -> list:
+    # menentukan posisi-posisi yang bisa ditempati
+
+    possibleMoves = []
+    totalColumn = 7  
+    totalRow = 6
+    for x in range (totalColumn):
+        for y in range (totalRow):
+            piecePos = (x,y)
+            if (isBlank(state, piece)):
+                possibleMoves.append(piecePos)
+                break
+    return possibleMoves
 

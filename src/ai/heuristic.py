@@ -42,15 +42,13 @@ def heuristicValue(state: State, position: Tuple[int, int], shape: ShapeConstant
     return totalValue
 
 def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant) -> int:
-    
-    shapeValue = 0
-
     # whose turn
     playing = whoseTurn(state)
 
     # list posisi yang dapat menguntungkan player
-    nearbyGoodSpace = listNearbyShape(state, position, playing)
+    nearbySameShape = listNearbyShape(state, position, playing)
 
+    '''
     # posisi sekarang
     xposition = position[0] 
     yposition = position[1]
@@ -58,8 +56,17 @@ def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant)
     # posisi yang akan di cek
     xcheck = position[0]
     ycheck = position[1]
+    '''
 
-    return shapeValue
+    shapeStreak = 0
+    for positionCheck in nearbySameShape:
+        arah = direction(position, positionCheck)
+        while(isPieceP1Shape(state, positionCheck)):
+            shapeStreak += 1
+            positionCheck[0] += arah[0]
+            positionCheck[1] += arah[1]
+
+    return shapeStreak
 
 def colorEvaluate(state: State, position: Tuple[int, int], color: ColorConstant) -> int:
     

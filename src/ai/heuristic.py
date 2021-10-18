@@ -1,9 +1,9 @@
 import random
 from time import time
-from model import piece
+from model import config, piece
 
 from src.constant import GameConstant, ShapeConstant, ColorConstant, Direction
-from src.model import State
+from src.model import State, Config
 # import src.ai.objective
 
 from typing import Tuple, List
@@ -41,6 +41,15 @@ def heuristicValue(state: State, position: Tuple[int, int], shape: ShapeConstant
 
 
     return totalValue
+
+def findBlankRow(state: State, column: int) -> int:
+#mencari baris ke berapa yang kosong pada suatu column
+    for baris in (state.board.row):
+        checkPosition = state.board[baris][column]
+        if(isBlank(state, checkPosition)):
+            break
+    return baris
+
 
 def shapeEvaluate(state: State, position: Tuple[int, int], shape: ShapeConstant) -> int:
     playing = whoseTurn(state)

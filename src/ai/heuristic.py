@@ -159,8 +159,7 @@ def isPieceP1Color(state: State, position: Tuple[int, int]) -> bool:
 
 def isBlank(state: State, position: Tuple[int, int]) -> bool:
     # cek apakah cell kosong
-    piece = state.board.__getitem__([position[0], position[1]])
-
+    piece = state.board.__getitem__(position)
     # true jika BLANK
     if piece.shape == ShapeConstant.BLANK:
         return True
@@ -309,7 +308,7 @@ def getPossibleMoves(state: State) -> list:
     for x in range (totalColumn):
         for y in range (totalRow):
             piecePos = (x,y)
-            if (isBlank(state, piece)):
+            if (isBlank(state, piecePos)):
                 possibleMoves.append(piecePos)
                 break
     return possibleMoves

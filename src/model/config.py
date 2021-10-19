@@ -49,8 +49,8 @@ class Config:
 
     def __str__(self):
         ret = '[Configuration]\n'
-        ret += f'cow: {self.row}\n'
-        ret += f'rol: {self.col}\n'
+        ret += f'row: {self.row}\n'
+        ret += f'col: {self.col}\n'
         ret += f'is_dump: {self.is_dump}\n'
         ret += f'game_type: {self.game_type}\n'
         ret += f'player_choice: {self.player_choice}\n'

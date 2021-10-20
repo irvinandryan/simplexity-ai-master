@@ -83,7 +83,7 @@ class LocalSearchGroup39:
 
         #mendata posisi mana saja yang bentuknya sama dengan playing
         nearbyPlayingShape = self.listNearbyShape(state, position, playing)
-        #mendata posisi mana saja yang warnanya sama dengan musuh
+        #mendata posisi mana saja yang bentuknya sama dengan musuh
         nearbyEnemyShape = self.listNearbyShape(state, position, enemy)
 
         playingShapeStreak = 0
@@ -171,7 +171,7 @@ class LocalSearchGroup39:
                     break
 
         if playingColorStreak == 3:
-            playingColorStreak *= 100
+            playingColorStreak *= 150
         else:
             playingColorStreak *= 10
         if enemyColorStreak == 3:
@@ -210,23 +210,23 @@ class LocalSearchGroup39:
             else:
                 return False
 
-    def isPieceP1Shape(self, state: State, position: Tuple[int, int]) -> bool:
-        # Cek apakah shape milik player 1
+    # def isPieceP1Shape(self, state: State, position: Tuple[int, int]) -> bool:
+    #     # Cek apakah shape milik player 1
 
-        piece = state.board.__getitem__([position[0], position[1]])
-        if piece.shape == GameConstant.PLAYER1_SHAPE:
-            return True
-        else:
-            return False
+    #     piece = state.board.__getitem__([position[0], position[1]])
+    #     if piece.shape == GameConstant.PLAYER1_SHAPE:
+    #         return True
+    #     else:
+    #         return False
 
-    def isPieceP1Color(self, state: State, position: Tuple[int, int]) -> bool:
-        # Cek apakah color milik player 1
+    # def isPieceP1Color(self, state: State, position: Tuple[int, int]) -> bool:
+    #     # Cek apakah color milik player 1
 
-        piece = state.board.__getitem__([position[0], position[1]])
-        if piece.color == GameConstant.PLAYER1_COLOR:
-            return True
-        else:
-            return False
+    #     piece = state.board.__getitem__([position[0], position[1]])
+    #     if piece.color == GameConstant.PLAYER1_COLOR:
+    #         return True
+    #     else:
+    #         return False
 
     def isBlank(self, state: State, position: Tuple[int, int]) -> bool:
         # cek apakah cell kosong
@@ -238,15 +238,6 @@ class LocalSearchGroup39:
             return False
 
     def isOutOfRange(self, state: State, position: Tuple[int,int]) -> bool:
-        # if (position[0] < 0 or position[0] > 6 or position[1] < 0 or position[1] > 5):
-        #     return True
-        # piece = state.board.__getitem__([position[1], position[0]])
-        # # true jika selain CIRCLE, CROSS, dan BLANK
-        
-        # if piece.shape != ShapeConstant.BLANK and piece.shape != ShapeConstant.CIRCLE and piece.shape != ShapeConstant.CROSS:
-        #     return True
-        # else:
-        #     return False
         
         outOfRange = is_out(state.board, position[0], position[1])
         return outOfRange
@@ -323,32 +314,32 @@ class LocalSearchGroup39:
 
         return nearbySameColor
 
-    def listNearbyGoodSpace(self, state: State, position: Tuple[int, int], playing: GameConstant) -> list:
-        # Mencari posisi" yang dapat menambah poin
-        # P1 berarti mencari RED atau CIRCLE
-        # P2 berarti mencari BLUE atau CROSS
+    # def listNearbyGoodSpace(self, state: State, position: Tuple[int, int], playing: GameConstant) -> list:
+    #     # Mencari posisi" yang dapat menambah poin
+    #     # P1 berarti mencari RED atau CIRCLE
+    #     # P2 berarti mencari BLUE atau CROSS
 
-        # selected position nearby same shape
-        nearbyGoodSpace = []
+    #     # selected position nearby same shape
+    #     nearbyGoodSpace = []
         
-        # selected position nearby filled space 
-        nearbyFilledSpace = self.listNearbyFilledSpace(state, position)
+    #     # selected position nearby filled space 
+    #     nearbyFilledSpace = self.listNearbyFilledSpace(state, position)
 
-        for space in nearbyFilledSpace:
+    #     for space in nearbyFilledSpace:
 
-            piece = state.board.__getitem__([space[0], space[1]])
-            nearbyGoodPos = (space[0], space[1])
+    #         piece = state.board.__getitem__([space[0], space[1]])
+    #         nearbyGoodPos = (space[0], space[1])
 
-            if (playing == GameConstant.PLAYER1):
-                # player 1 turn
-                if (piece.shape == GameConstant.PLAYER1_SHAPE or piece.color == GameConstant.PLAYER1_COLOR):
-                    nearbyGoodSpace.append(nearbyGoodPos)
-            else:       
-                # player 2 turn
-                if (piece.shape == GameConstant.PLAYER2_SHAPE or piece.color == GameConstant.PLAYER2_COLOR):
-                    nearbyGoodSpace.append(nearbyGoodPos)
+    #         if (playing == GameConstant.PLAYER1):
+    #             # player 1 turn
+    #             if (piece.shape == GameConstant.PLAYER1_SHAPE or piece.color == GameConstant.PLAYER1_COLOR):
+    #                 nearbyGoodSpace.append(nearbyGoodPos)
+    #         else:       
+    #             # player 2 turn
+    #             if (piece.shape == GameConstant.PLAYER2_SHAPE or piece.color == GameConstant.PLAYER2_COLOR):
+    #                 nearbyGoodSpace.append(nearbyGoodPos)
 
-        return nearbyGoodSpace
+    #     return nearbyGoodSpace
 
     def direction(self, position1: Tuple[int,int], position2: Tuple[int,int]) -> Direction:
         # posisi 2 sebelah kanan
@@ -400,4 +391,3 @@ class LocalSearchGroup39:
         # for move in possibleMoves:
         #     print(type(move[1]))
         return possibleMoves
-

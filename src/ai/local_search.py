@@ -26,7 +26,6 @@ class LocalSearch:
             enemyShape = GameConstant.PLAYER1_SHAPE
 
         bestPosition = self.steepestHC(state, playing)
-        # bestColumn = str(bestPosition[1])
 
         bestColumn = bestPosition[1]
 
@@ -35,7 +34,7 @@ class LocalSearch:
         else:
             chosenShape = enemyShape
 
-        #best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE])) #minimax algorithm
+        # best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
         best_movement = (bestColumn, chosenShape)
         return best_movement
     
@@ -394,7 +393,7 @@ class LocalSearch:
         for x in range (totalRow):
             for y in range (totalColumn):
                 piecePos = (x,y)
-                if (self.isBlank(state, piecePos) and not self.isOutOfRange(state,[y,x])):
+                if (self.isBlank(state, piecePos) and not self.isOutOfRange(state,[x,y])):
                     possibleMoves.append(piecePos)
                     break
         print(possibleMoves)

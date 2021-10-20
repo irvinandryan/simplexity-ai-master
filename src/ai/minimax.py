@@ -17,16 +17,63 @@ class Minimax:
     def find(self, state: State, n_player: int, thinking_time: float) -> Tuple[str, str]:
         self.thinking_time = time() + thinking_time
 
-        playing = self.whoseTurn(state)
-
         #minimax algorithm
-        best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
+        # best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
         
-        # best_movement = self.minimax(state, 3, playing)
+        playing = self.whoseTurn(state)
+        if playing == GameConstant.PLAYER1:
+            playingShape = GameConstant.PLAYER1_SHAPE
+            enemyShape = GameConstant.PLAYER2_SHAPE
+        else:
+            playingShape = GameConstant.PLAYER2_SHAPE
+            enemyShape = GameConstant.PLAYER1_SHAPE
+
+        # bestPosition = self.minimax(state, playing)
+
+        # bestColumn = bestPosition[1]
+
+        if state.players[n_player].quota[playingShape] > 0:
+            chosenShape = playingShape
+        else:
+            chosenShape = enemyShape
+
+        best_movement = self.minimaxjo(state, 3, -99999, 99999, playing)[0], chosenShape
 
         return best_movement
 
-    def minimax(self, state: State, depth: int, playing: GameConstant) -> Tuple[str,str]:
+    # def minimax3(self, state: State, depth: int, playing: GameConstant) -> Tuple[int,int]:
+
+    #     possibleMoves = self.getPossibleMoves(state)
+    #     playing = self.whoseTurn(state)
+
+    #     if playing == GameConstant.PLAYER1:
+    #         playingShape = GameConstant.PLAYER1_SHAPE
+    #         playingColor = GameConstant.PLAYER1_COLOR
+    #         enemyShape = GameConstant.PLAYER2_SHAPE
+    #         enemyShape = GameConstant.PLAYER2_COLOR
+    #     else:
+    #         playingShape = GameConstant.PLAYER2_SHAPE
+    #         playingColor = GameConstant.PLAYER2_COLOR
+    #         enemyShape = GameConstant.PLAYER1_SHAPE
+    #         enemyShape = GameConstant.PLAYER1_COLOR
+
+    #     for move in possibleMoves:
+    #         # basis
+    #         if (depth == 0 or is_win(state.board)):
+    #             return self.heuristicValue(state, move, playingShape, playingColor)
+                
+    #         # rekursif
+    #         if (playing == GameConstant.PLAYER1):
+    #             # maximizing
+    #             value = -9999
+                
+    #             pass
+    #         else:
+    #             # minimizing
+    #             pass
+
+
+    def minimax(self, state: State, depth: int, playing: GameConstant) -> Tuple[int,int]:
         # Minimax Alpha Beta Pruning
 
         if (playing == GameConstant.PLAYER1):
@@ -51,6 +98,9 @@ class Minimax:
                 bestMove = move
 
         theBestMove = (bestMove[1], random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
+
+        if is_full(state.board):
+            return ()
         return theBestMove
 
     def minimize(self, state: State, position: Tuple[int,int], depth, a, b, playing: GameConstant) -> int:
@@ -119,135 +169,121 @@ class Minimax:
     def tempMove(self, state: State, position: Tuple[int,int], playing: GameConstant) -> State:
         if (playing == GameConstant.PLAYER1):
             tempPiece = Piece(GameConstant.PLAYER1_SHAPE, GameConstant.PLAYER1_COLOR)
+            n_player = 0
+            playingShape = GameConstant.PLAYER1_SHAPE
+            playingColor = GameConstant.PLAYER1_COLOR
         else:
             tempPiece = Piece(GameConstant.PLAYER2_SHAPE, GameConstant.PLAYER2_COLOR)
+            n_player = 1
+            playingShape = GameConstant.PLAYER2_SHAPE
+            playingColor = GameConstant.PLAYER2_COLOR
         tempState = state
         tempState.round += 1
-        tempState.board.set_piece(position[1], position[0], tempPiece)
+        # tempState.board.set_piece(position[0], position[1], tempPiece)
+        if tempState.board[position[0], position[1]].shape == ShapeConstant.BLANK:
+            piece = Piece(playingShape, GameConstant.PLAYER_COLOR[n_player])
+            tempState.board.set_piece(position[0], position[1], piece)
+            tempState.players[n_player].quota[playingShape] -= 1
         return tempState
         
     # state, position, bentuk, warna
-    def heuristicValue(self, state: State, position: Tuple[int, int], shape: ShapeConstant, color: ColorConstant):
+    def heuristicValue(self, state: State):
         # input : -> state    : state sekarang
-        #         -> position : posisi yang mau dihitung nilai heuristic nya
-        #         -> shape    : bentuk dari piece yang mau diletakkan
-        #         -> color    : warna dari piece yang mau diletakkan  
+        #         -> player   : player yang bermain sekarang
         
         # total value
-        totalValue = 0
-        totalValue = self.shapeEvaluate(state, position, shape) + self.colorEvaluate(state, position, color)
+        totalValue = self.shapeEvaluate(state) + self.colorEvaluate(state)
 
         return totalValue
 
-    def shapeEvaluate(self, state: State, position: Tuple[int, int], shape: ShapeConstant) -> int:
-        playing = self.whoseTurn(state)
-        if playing == GameConstant.PLAYER1:
-            enemy = GameConstant.PLAYER2
-        else:
-            enemy = GameConstant.PLAYER1
+    def shapeEvaluate(self, state: State) -> int:
+        playingShapeStreak = [0, 0]
+        enemyShapeStreak = [0, 0]
 
-        #playing adalah pemain yang sedang turn-nya
+        for row in range(state.board.row):
+            for col in range(state.board.col):
+                if (not self.isBlank(state, [row,col])):
+                    piece = state.board[row, col]
 
-        #mendata posisi mana saja yang bentuknya sama dengan playing
-        nearbyPlayingShape = self.listNearbyShape(state, position, playing)
-        #mendata posisi mana saja yang warnanya sama dengan musuh
-        nearbyEnemyShape = self.listNearbyShape(state, position, enemy)
+                    streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
-        playingShapeStreak = 0
-        enemyShapeStreak = 0
+                    mark = 0
+                    enemyMark = 0
+                    for row_ax, col_ax in streak_way:
+                        row_ = row + row_ax
+                        col_ = col + col_ax
+                        for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
+                            if (is_out(state.board, row_, col_)):
+                                break
+                            row_ += row_ax
+                            col_ += col_ax
+                            if (piece.shape == GameConstant.PLAYER1_SHAPE):
+                                mark += 1
+                            elif (piece.shape == GameConstant.PLAYER2_SHAPE):
+                                enemyMark += 1
 
-        #cek streak untuk playing
-        for playingCheck in nearbyPlayingShape:
-            arah = self.direction(position, playingCheck)
-            playingCheckPos = list(playingCheck)
-            piece = state.board.__getitem__([playingCheck[0], playingCheck[1]])
-            while(self.isPiecePlayingShape(state, playingCheckPos) and shape == piece.shape):
-                playingShapeStreak += 1
-                if not is_out(state.board, playingCheckPos[0]+arah[0], playingCheckPos[1]+arah[1]):
-                    playingCheckPos[0] += arah[0]
-                    playingCheckPos[1] += arah[1]
-                else:
-                    break
+                        if (mark == 3):
+                            playingShapeStreak[1] += 1
+                        elif (mark == 2):
+                            playingShapeStreak[0] += 1
 
-        #cek streak untuk enemy
-        for enemyCheck in nearbyEnemyShape:
-            arah = self.direction(position, enemyCheck)
-            enemyCheckPos = list(enemyCheck)
-            piece = state.board.__getitem__([enemyCheck[0], enemyCheck[1]])
-            while(not self.isPiecePlayingShape(state, enemyCheckPos) and  not shape == piece.shape ):
-                enemyShapeStreak += 1 
-                if not is_out(state.board , enemyCheckPos[0]+arah[0], enemyCheckPos[1]+arah[1]):
-                    enemyCheckPos[0] += arah[0]
-                    enemyCheckPos[1] += arah[1]
-                else:
-                    break
-        
-        if playingShapeStreak == 3:
-            playingShapeStreak *= 200
-        else:
-            playingShapeStreak *= 20
-        if enemyShapeStreak == 3:
-            enemyShapeStreak *= 150
-        else:
-            enemyShapeStreak *= 20
-        
-        shapeStreak = playingShapeStreak + enemyShapeStreak
-        return shapeStreak
+                        if (enemyMark == 3):
+                            enemyShapeStreak[1] += 1
+                        elif (enemyMark == 2):
+                            enemyShapeStreak[0] += 1
 
-    def colorEvaluate(self, state: State, position: Tuple[int, int], color: ColorConstant) -> int:
-        playing = self.whoseTurn(state)
-        if playing == GameConstant.PLAYER1:
-            enemy = GameConstant.PLAYER2
-        else:
-            enemy = GameConstant.PLAYER1
+                        mark = 0
+                        enemyMark = 0
+                    
+                    playingShapeValue = playingShapeStreak[0] * 5 + playingShapeStreak[1] * 10
+                    enemyShapeValue = enemyShapeStreak[0] * 5 + enemyShapeStreak[1] * 10
+                    shapeStreak = playingShapeValue - enemyShapeValue
+                    return shapeStreak
 
-        #playing adalah pemain yang sedang turn-nya
+    def colorEvaluate(self, state: State) -> int:
+        playingColorStreak = [0, 0]
+        enemyColorStreak = [0, 0]
 
-        #mendata posisi mana saja yang warnanya sama dengan playing
-        nearbyPlayingColor = self.listNearbyColor(state, position, playing)
-        #mendata posisi mana saja yang warnanya sama dengan musuh
-        nearbyEnemyColor = self.listNearbyColor(state, position, enemy)
+        for row in range(state.board.row):
+            for col in range(state.board.col):
+                if (not self.isBlank(state, [row,col])):
+                    piece = state.board[row, col]
 
-        playingColorStreak = 0
-        enemyColorStreak = 0
+                    streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
-        #cek streak untuk playing jika dipilih position sebagai next step
-        for playingCheck in nearbyPlayingColor:
-            arah = self.direction(position, playingCheck)
-            playingCheckPos = list(playingCheck)
-            piece = state.board.__getitem__([playingCheck[0], playingCheck[1]])
-            while(self.isPiecePlayingColor(state, playingCheckPos) and color == piece.color):
-                playingColorStreak += 1
-                if not is_out(state.board, playingCheckPos[0]+arah[0], playingCheckPos[1]+arah[1]):
-                    playingCheckPos[0] += arah[0]
-                    playingCheckPos[1] += arah[1]
-                else:
-                    break
+                    mark = 0
+                    enemyMark = 0
+                    for row_ax, col_ax in streak_way:
+                        row_ = row + row_ax
+                        col_ = col + col_ax
+                        for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
+                            if (is_out(state.board, row_, col_)):
+                                break
+                            row_ += row_ax
+                            col_ += col_ax
+                            if (piece.color == GameConstant.PLAYER1_COLOR):
+                                mark += 1
+                            elif (piece.color == GameConstant.PLAYER2_COLOR):
+                                enemyMark += 1
 
-        #cek streak untuk enemy jika enemy memilih position sebagai next step
-        for enemyCheck in nearbyEnemyColor:
-            arah = self.direction(position, enemyCheck)
-            enemyCheckPos = list(enemyCheck)
-            piece = state.board.__getitem__([enemyCheck[0], enemyCheck[1]])
-            while(not self.isPiecePlayingColor(state, enemyCheckPos) and  not color == piece.color  ):
-                enemyColorStreak += 1 
-                if not is_out(state.board , enemyCheckPos[0]+arah[0], enemyCheckPos[1]+arah[1]):
-                    enemyCheckPos[0] += arah[0]
-                    enemyCheckPos[1] += arah[1]
-                else:
-                    break
+                        if (mark == 3):
+                            playingColorStreak[1] += 1
+                        elif (mark == 2):
+                            playingColorStreak[0] += 1
 
-        if playingColorStreak == 3:
-            playingColorStreak *= 100
-        else:
-            playingColorStreak *= 10
-        if enemyColorStreak == 3:
-            enemyColorStreak *= 50
-        else:
-            enemyColorStreak *= 10
-        
-        colorStreak = playingColorStreak + enemyColorStreak
-        return colorStreak
+                        if (enemyMark == 3):
+                            enemyColorStreak[1] += 1
+                        elif (enemyMark == 2):
+                            enemyColorStreak[0] += 1
+
+                        mark = 0
+                        enemyMark = 0
+                    
+                    playingColorValue = playingColorStreak[0] * 3 + playingColorStreak[1] * 7
+                    enemyColorValue = enemyColorStreak[0] * 3 + enemyColorStreak[1] * 7
+                    ColorStreak = playingColorValue - enemyColorValue
+                    return ColorStreak
+
 
     def isPiecePlayingColor(self, state: State, position: Tuple[int, int]) -> bool:
         playing = self.whoseTurn(state)
@@ -460,10 +496,91 @@ class Minimax:
         for x in range (totalRow):
             for y in range (totalColumn):
                 piecePos = (x,y)
-                if (self.isBlank(state, piecePos) and not self.isOutOfRange(state,[y,x])):
+                if (self.isBlank(state, piecePos) and not self.isOutOfRange(state,[x,y])):
                     possibleMoves.append(piecePos)
                     break
         print(possibleMoves)
         # for move in possibleMoves:
         #     print(type(move[1]))
         return possibleMoves
+
+
+    def minimax3(self, state: State, depth: int, playing: GameConstant) -> Tuple[int,int]:
+
+        possibleMoves = self.getPossibleMoves(state)
+        playing = self.whoseTurn(state)
+
+        if playing == GameConstant.PLAYER1:
+            playingShape = GameConstant.PLAYER1_SHAPE
+            playingColor = GameConstant.PLAYER1_COLOR
+            enemyShape = GameConstant.PLAYER2_SHAPE
+            enemyShape = GameConstant.PLAYER2_COLOR
+        else:
+            playingShape = GameConstant.PLAYER2_SHAPE
+            playingColor = GameConstant.PLAYER2_COLOR
+            enemyShape = GameConstant.PLAYER1_SHAPE
+            enemyShape = GameConstant.PLAYER1_COLOR
+
+        for move in possibleMoves:
+            # basis
+            if (depth == 0 or is_win(state.board)):
+                return self.heuristicValue(state, move, playingShape, playingColor)
+                
+            # rekursif
+            if (playing == GameConstant.PLAYER1):
+                self.maximizing3(state, 3, playing)
+            else:
+                self.minimizing3(state, 3, playing)
+
+
+    def minimaxjo(self, state: State, depth: int, alpha: int, beta: int, playing: GameConstant) -> tuple[int,int]:
+        if (playing == GameConstant.PLAYER1):
+            enemy = GameConstant.PLAYER2
+        else:
+            enemy = GameConstant.PLAYER1
+
+        possibleMoves = self.getPossibleMoves(state)
+        iswin = is_win(state.board)
+        if (depth == 0 or iswin or is_full(state.board)):
+            if iswin:
+                if (iswin[0] == GameConstant.PLAYER1_SHAPE):
+                    return (None, 99999)
+                elif (iswin[0] == GameConstant.PLAYER2_SHAPE):
+                    return (None, -99999)
+            elif is_full(state.board):
+                return (None, 0)
+            else: 
+                # depth == 0
+                return (None, self.heuristicValue(state))
+
+        if (playing == GameConstant.PLAYER1):
+            # maximizing
+            value = -99999
+            column = random.choice(possibleMoves)[1]
+            for row, col in possibleMoves:
+                tempState = self.tempMove(state, [row,col], playing)
+                new_score = self.minimaxjo(tempState, depth-1, alpha, beta, enemy)[1]
+
+                if new_score > value:
+                    value = new_score
+                    column = col
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break
+            return column, value
+        else: # player 2
+            # minimizing
+            value = 99999
+            column = random.choice(possibleMoves)
+            for row, col in possibleMoves:
+                tempState = self.tempMove(state, [row,col], playing)
+                new_score = self.minimaxjo(tempState, depth-1, alpha, beta, enemy)[1]
+
+                if new_score < value:
+                    value = new_score
+                    column = col
+                beta = min(beta, value)
+                if alpha >= beta:
+                    break
+            return column, value
+

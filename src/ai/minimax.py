@@ -20,7 +20,10 @@ class Minimax:
         #minimax algorithm
         # best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
         
-        playing = self.whoseTurn(state)
+        if n_player == 0:
+            playing = GameConstant.PLAYER1
+        else:
+            playing = GameConstant.PLAYER2
         if playing == GameConstant.PLAYER1:
             playingShape = GameConstant.PLAYER1_SHAPE
             enemyShape = GameConstant.PLAYER2_SHAPE
@@ -37,7 +40,10 @@ class Minimax:
         else:
             chosenShape = enemyShape
 
-        best_movement = self.minimaxjo(state, 3, -99999, 99999, playing)[0], chosenShape
+        if n_player == 0:
+            best_movement = self.minimaxjo(state.board, 3, -99999, 99999, True)[0], chosenShape
+        else:
+            best_movement = self.minimaxjo(state.board, 3, -99999, 99999, False)[0], chosenShape
 
         return best_movement
 
@@ -180,30 +186,27 @@ class Minimax:
         tempState = state
         tempState.round += 1
         # tempState.board.set_piece(position[0], position[1], tempPiece)
-        if tempState.board[position[0], position[1]].shape == ShapeConstant.BLANK:
-            piece = Piece(playingShape, GameConstant.PLAYER_COLOR[n_player])
-            tempState.board.set_piece(position[0], position[1], piece)
-            tempState.players[n_player].quota[playingShape] -= 1
+        placement = place(tempState, n_player, playingShape, position[1])
         return tempState
         
     # state, position, bentuk, warna
-    def heuristicValue(self, state: State):
+    def heuristicValue(self, board: Board):
         # input : -> state    : state sekarang
         #         -> player   : player yang bermain sekarang
         
         # total value
-        totalValue = self.shapeEvaluate(state) + self.colorEvaluate(state)
+        totalValue = self.shapeEvaluate(board) + self.colorEvaluate(board)
 
         return totalValue
 
-    def shapeEvaluate(self, state: State) -> int:
+    def shapeEvaluate(self, board: Board) -> int:
         playingShapeStreak = [0, 0]
         enemyShapeStreak = [0, 0]
 
-        for row in range(state.board.row):
-            for col in range(state.board.col):
-                if (not self.isBlank(state, [row,col])):
-                    piece = state.board[row, col]
+        for row in range(board.row):
+            for col in range(board.col):
+                if (not self.isBlank(board, [row,col])):
+                    piece = board[row, col]
 
                     streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
@@ -213,14 +216,17 @@ class Minimax:
                         row_ = row + row_ax
                         col_ = col + col_ax
                         for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
-                            if (is_out(state.board, row_, col_)):
+                            if (is_out(board, row_, col_)):
                                 break
-                            row_ += row_ax
-                            col_ += col_ax
+                            
                             if (piece.shape == GameConstant.PLAYER1_SHAPE):
                                 mark += 1
                             elif (piece.shape == GameConstant.PLAYER2_SHAPE):
                                 enemyMark += 1
+                            if piece.shape != board[row_, col_].shape:
+                                break
+                            row_ += row_ax
+                            col_ += col_ax
 
                         if (mark == 3):
                             playingShapeStreak[1] += 1
@@ -240,14 +246,14 @@ class Minimax:
                     shapeStreak = playingShapeValue - enemyShapeValue
                     return shapeStreak
 
-    def colorEvaluate(self, state: State) -> int:
+    def colorEvaluate(self, board: Board) -> int:
         playingColorStreak = [0, 0]
         enemyColorStreak = [0, 0]
 
-        for row in range(state.board.row):
-            for col in range(state.board.col):
-                if (not self.isBlank(state, [row,col])):
-                    piece = state.board[row, col]
+        for row in range(board.row):
+            for col in range(board.col):
+                if (not self.isBlank(board, [row,col])):
+                    piece = board[row, col]
 
                     streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
@@ -257,14 +263,16 @@ class Minimax:
                         row_ = row + row_ax
                         col_ = col + col_ax
                         for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
-                            if (is_out(state.board, row_, col_)):
-                                break
-                            row_ += row_ax
-                            col_ += col_ax
+                            if (is_out(board, row_, col_)):
+                                break   
                             if (piece.color == GameConstant.PLAYER1_COLOR):
                                 mark += 1
                             elif (piece.color == GameConstant.PLAYER2_COLOR):
                                 enemyMark += 1
+                            if piece.color != board[row_, col_].shape:
+                                break
+                            row_ += row_ax
+                            col_ += col_ax
 
                         if (mark == 3):
                             playingColorStreak[1] += 1
@@ -331,9 +339,9 @@ class Minimax:
         else:
             return False
 
-    def isBlank(self, state: State, position: Tuple[int, int]) -> bool:
+    def isBlank(self, board: Board, position: Tuple[int, int]) -> bool:
         # cek apakah cell kosong
-        piece = state.board.__getitem__(position)
+        piece = board[position[0], position[1]]
         # true jika BLANK
         if piece.shape == ShapeConstant.BLANK:
             return True
@@ -487,81 +495,50 @@ class Minimax:
             elif position2[1] - position1[1] == -1:
                 return Direction.S
             
-    def getPossibleMoves(self, state: State) -> list:
+    def getPossibleMoves(self, board: Board) -> list:
         # menentukan posisi-posisi yang bisa ditempati
 
         possibleMoves = []
-        totalColumn = 7
-        totalRow = 6
-        for x in range (totalRow):
-            for y in range (totalColumn):
-                piecePos = (x,y)
-                if (self.isBlank(state, piecePos) and not self.isOutOfRange(state,[x,y])):
+        totalColumn = board.col
+        totalRow = board.row
+        for x in range (0, totalColumn, 1): # 0,1,2,3,4,5,6
+            for y in range (totalRow-1, -1, -1): # 5,4,3,2,1,0
+                piecePos = (y,x)
+                if (self.isBlank(board, piecePos) and not is_out(board,y,x)):
                     possibleMoves.append(piecePos)
                     break
-        print(possibleMoves)
+        # print(possibleMoves)
         # for move in possibleMoves:
         #     print(type(move[1]))
         return possibleMoves
 
 
-    def minimax3(self, state: State, depth: int, playing: GameConstant) -> Tuple[int,int]:
-
-        possibleMoves = self.getPossibleMoves(state)
-        playing = self.whoseTurn(state)
-
-        if playing == GameConstant.PLAYER1:
-            playingShape = GameConstant.PLAYER1_SHAPE
-            playingColor = GameConstant.PLAYER1_COLOR
-            enemyShape = GameConstant.PLAYER2_SHAPE
-            enemyShape = GameConstant.PLAYER2_COLOR
-        else:
-            playingShape = GameConstant.PLAYER2_SHAPE
-            playingColor = GameConstant.PLAYER2_COLOR
-            enemyShape = GameConstant.PLAYER1_SHAPE
-            enemyShape = GameConstant.PLAYER1_COLOR
-
-        for move in possibleMoves:
-            # basis
-            if (depth == 0 or is_win(state.board)):
-                return self.heuristicValue(state, move, playingShape, playingColor)
-                
-            # rekursif
-            if (playing == GameConstant.PLAYER1):
-                self.maximizing3(state, 3, playing)
-            else:
-                self.minimizing3(state, 3, playing)
-
-
-    def minimaxjo(self, state: State, depth: int, alpha: int, beta: int, playing: GameConstant) -> tuple[int,int]:
-        if (playing == GameConstant.PLAYER1):
-            enemy = GameConstant.PLAYER2
-        else:
-            enemy = GameConstant.PLAYER1
-
-        possibleMoves = self.getPossibleMoves(state)
-        iswin = is_win(state.board)
-        if (depth == 0 or iswin or is_full(state.board)):
+    def minimaxjo(self, board: Board, depth: int, alpha: int, beta: int, maximizingPlayer: bool) -> tuple[int,int]:
+        possibleMoves = self.getPossibleMoves(board)
+        iswin = is_win(board)
+        # basis
+        if (depth == 0 or iswin or is_full(board)):
             if iswin:
-                if (iswin[0] == GameConstant.PLAYER1_SHAPE):
+                if (iswin[0] == GameConstant.PLAYER1_SHAPE or iswin[1] == GameConstant.PLAYER1_COLOR):
                     return (None, 99999)
-                elif (iswin[0] == GameConstant.PLAYER2_SHAPE):
+                elif (iswin[0] == GameConstant.PLAYER2_SHAPE or iswin[1] == GameConstant.PLAYER2_COLOR):
                     return (None, -99999)
-            elif is_full(state.board):
+            elif is_full(board):
                 return (None, 0)
             else: 
                 # depth == 0
-                return (None, self.heuristicValue(state))
+                return (None, self.heuristicValue(board))
 
-        if (playing == GameConstant.PLAYER1):
+        if maximizingPlayer:
             # maximizing
             value = -99999
             column = random.choice(possibleMoves)[1]
             for row, col in possibleMoves:
-                tempState = self.tempMove(state, [row,col], playing)
-                new_score = self.minimaxjo(tempState, depth-1, alpha, beta, enemy)[1]
-
-                if new_score > value:
+                tempBoard = self.copyBoard(board)
+                tempBoard.set_piece(row,col,Piece(GameConstant.PLAYER1_SHAPE,GameConstant.PLAYER1_COLOR))
+                
+                new_score = self.minimaxjo(tempBoard, depth-1, alpha, beta, False)[1]
+                if new_score >= value:
                     value = new_score
                     column = col
                 alpha = max(alpha, value)
@@ -573,10 +550,11 @@ class Minimax:
             value = 99999
             column = random.choice(possibleMoves)
             for row, col in possibleMoves:
-                tempState = self.tempMove(state, [row,col], playing)
-                new_score = self.minimaxjo(tempState, depth-1, alpha, beta, enemy)[1]
+                tempBoard = self.copyBoard(board)
+                tempBoard.set_piece(row,col,Piece(GameConstant.PLAYER2_SHAPE,GameConstant.PLAYER2_COLOR))
+                new_score = self.minimaxjo(tempBoard, depth-1, alpha, beta, True)[1]
 
-                if new_score < value:
+                if new_score <= value:
                     value = new_score
                     column = col
                 beta = min(beta, value)
@@ -584,3 +562,9 @@ class Minimax:
                     break
             return column, value
 
+    def copyBoard(self, board: Board) -> Board:
+        boardCopy = Board(board.row, board.col)
+        for x in range(board.row):
+            for y in range(board.col):
+                boardCopy.set_piece(x,y,board[x,y])
+        return boardCopy

@@ -388,12 +388,12 @@ class LocalSearch:
         # menentukan posisi-posisi yang bisa ditempati
 
         possibleMoves = []
-        totalColumn = 7
-        totalRow = 6
-        for x in range (totalRow):
-            for y in range (totalColumn):
-                piecePos = (x,y)
-                if (self.isBlank(state, piecePos) and not self.isOutOfRange(state,[x,y])):
+        totalColumn = state.board.col
+        totalRow = state.board.row
+        for x in range (0, totalColumn, 1): # 0,1,2,3,4,5,6
+            for y in range (totalRow-1, -1, -1): # 5,4,3,2,1,0
+                piecePos = (y,x)
+                if (self.isBlank(state, piecePos) and not self.isOutOfRange(state,[y,x])):
                     possibleMoves.append(piecePos)
                     break
         print(possibleMoves)

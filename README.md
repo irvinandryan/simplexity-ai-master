@@ -1,5 +1,12 @@
 # Simplexity Board Game
 
+## Created by Kelompok 39 "bebas" IF3170 Artificial Intelligence
+
+13519001 - K01 - Karlsen Adiyasa Bachtiar
+13519073 - K01 - Joel Triwira
+13519153 - K01 - Maximillian Lukman
+13519162 - K02 - Irvin Andryan Pratomo
+
 ## 📖  How to Run
 
 1. Install virtualenv if you haven't

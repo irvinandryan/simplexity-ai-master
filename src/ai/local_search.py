@@ -10,7 +10,7 @@ from src.model import State
 from typing import Tuple, List
 
 
-class LocalSearch:
+class LocalSearchGroup39:
     def __init__(self):
         pass
 

@@ -10,7 +10,7 @@ from src.model import State
 from typing import Tuple, List
 
 
-class Minimax:
+class MinimaxGroup39:
     def __init__(self):
         pass
 
@@ -41,13 +41,13 @@ class Minimax:
             chosenShape = enemyShape
 
         if n_player == 0:
-            best_movement = self.minimaxjo(state.board, 3, -99999, 99999, True)[0], chosenShape
+            best_movement = self.minimax(state.board, 5, -99999, 99999, True)[0], chosenShape
         else:
-            best_movement = self.minimaxjo(state.board, 3, -99999, 99999, False)[0], chosenShape
+            best_movement = self.minimax(state.board, 5, -99999, 99999, False)[0], chosenShape
 
         return best_movement
         
-    def minimaxjo(self, board: Board, depth: int, alpha: int, beta: int, maximizingPlayer: bool) -> tuple[int,int]:
+    def minimax(self, board: Board, depth: int, alpha: int, beta: int, maximizingPlayer: bool) -> tuple[int,int]:
         possibleMoves = self.getPossibleMoves(board)
         iswin = is_win(board)
         # basis
@@ -71,7 +71,7 @@ class Minimax:
                 tempBoard = self.copyBoard(board)
                 tempBoard.set_piece(row,col,Piece(GameConstant.PLAYER1_SHAPE,GameConstant.PLAYER1_COLOR))
                 
-                new_score = self.minimaxjo(tempBoard, depth-1, alpha, beta, False)[1]
+                new_score = self.minimax(tempBoard, depth-1, alpha, beta, False)[1]
                 if new_score >= value:
                     value = new_score
                     column = col
@@ -86,7 +86,7 @@ class Minimax:
             for row, col in possibleMoves:
                 tempBoard = self.copyBoard(board)
                 tempBoard.set_piece(row,col,Piece(GameConstant.PLAYER2_SHAPE,GameConstant.PLAYER2_COLOR))
-                new_score = self.minimaxjo(tempBoard, depth-1, alpha, beta, True)[1]
+                new_score = self.minimax(tempBoard, depth-1, alpha, beta, True)[1]
 
                 if new_score < value:
                     value = new_score
